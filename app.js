@@ -15,21 +15,16 @@ app.get('/', function(req, res) {
 });
 
 /* config variables */
-var channel = process.env.CHANNEL;
-var username = process.env.USERNAME;
 var url = process.env.URL;
 
 /* returns genarated message to send using request payload by GitHub */
-var generateMessage = function(req) {
-  var result = '';
+var message = function(event) {
+  var pull_request = event.pull_request;
+  return '[#'+event.number+'] ' + pull_request.title;
+}
 
-  var data = req.body;
-
-  if(data.action == 'closed' && data.pull_request.merged == 'true') {
-    result += '[#'+data.number+']' + data.pull_request.title;
-  }
-
-  return result;
+var closedPR = function(event){
+  return (event.action == 'closed' && event.pull_request.merged.toString() == "true");
 }
 
 /*
@@ -46,20 +41,13 @@ app.post('/', function(req, res) {
       return res.status(200).json({value: 'pong'});
     }
 
-    var options = {};
-    options.url = url;
-    options.method = 'POST';
-
-    /* use default channel and username if they are not present in config */
-    options.body = {};
-    if(channel) {options.body['channel'] = '#'+ channel +'';}
-    if(username) {options.body['username'] = ''+ username +'';}
-    console.log("Would be sending message '%s'", generateMessage(req));
-    var message = generateMessage(req);
-    if(message.length > 0) {
-      options.body['text'] = message
-
-      options.json = true;
+    if(closedPR(req.body)) {
+      var options = {};
+      options.url     = url;
+      options.method  = 'POST';
+      options.body    = {};
+      options.json    = true;
+      options.body['text'] = message(req.body)
 
       request(options, function (err, response, body) {
         var headers = response.headers;
@@ -70,7 +58,6 @@ app.post('/', function(req, res) {
       res.send(200)
     }
   }
-
 });
 
 var port = process.env.PORT || 5000;
