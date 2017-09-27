@@ -11,7 +11,7 @@ app.use(express.bodyParser());
 
 /* redirects to GitHub Repo of the module */
 app.get('/', function(req, res) {
-  res.redirect('https://github.com/sdslabs/slack-github');
+  res.redirect('https://github.com/prikha/slack-github');
 });
 
 /* config variables */
@@ -25,13 +25,8 @@ var generateMessage = function(req) {
 
   var data = req.body;
 
-  for(var i=0;i<data.commits.length;i++)
-  {
-    var commit = data.commits[i];
-    var repo = data.repository;
-
-    result += '<@' + commit.author.username + '>' + ' <' +commit.url+  '|committed:> in <' + repo.url + '|' + repo.name + '> :' + commit.message;
-    result += '\n';
+  if(data.action == 'closed' && data.pull_request.merged == 'true') {
+    result += '[#'+data.number+']' + data.pull_request.title;
   }
 
   return result;
