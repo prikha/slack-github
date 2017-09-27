@@ -55,15 +55,20 @@ app.post('/', function(req, res) {
     if(channel) {options.body['channel'] = '#'+ channel +'';}
     if(username) {options.body['username'] = ''+ username +'';}
     console.log("Would be sending message '%s'", generateMessage(req));
-    options.body['text'] = generateMessage(req);
+    var message = generateMessage(req);
+    if(message.length > 0) {
+      options.body['text'] = message
 
-    options.json = true;
+      options.json = true;
 
-    request(options, function (err, response, body) {
-      var headers = response.headers;
-      var statusCode = response.statusCode;
-      res.send(statusCode);
-    });
+      request(options, function (err, response, body) {
+        var headers = response.headers;
+        var statusCode = response.statusCode;
+        res.send(statusCode);
+      });
+    } else {
+      res.send(200)
+    }
   }
 
 });
