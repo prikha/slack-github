@@ -20,7 +20,7 @@ var url = process.env.URL;
 /* returns genarated message to send using request payload by GitHub */
 var message = function(event) {
   var pull_request = event.pull_request;
-  return '[#'+event.number+'] ' + pull_request.title;
+  return '<'+event.pull_request.url+'|[#'+event.number+']> '+pull_request.title;
 }
 
 var closedPR = function(event){
